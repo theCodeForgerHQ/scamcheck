@@ -2,6 +2,8 @@
 
 **Track:** AI + Cybersecurity · Built during ForgeHacks Online 2026 (Oct 3–10).
 
+**Live demo:** https://scamcheck.streamlit.app
+
 ## Problem
 AI-written phishing SMS, fake KYC alerts, delivery-fee scams and lookalike links fool millions, especially first-time smartphone users. People need a quick second opinion **before** they click or share an OTP.
 
