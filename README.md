@@ -12,19 +12,19 @@ Anyone who receives a suspicious SMS, email or DM: students, parents and elderly
 ```mermaid
 flowchart LR
   A[Pasted message] --> B[Rule engine: urgency, OTP or payment asks, short links, raw IPs, lookalike domains]
-  A --> C[Featherless LLM: JSON verdict, reasons, advice]
+  A --> C[LLM (Groq / NVIDIA NIM / Featherless): JSON verdict, reasons, advice]
   B --> D[Blended risk score 0-100]
   C --> D
   D --> E[Verdict + red flags + what to do]
 ```
 - **Rule engine:** regex signals, plus lookalike-domain detection (`difflib` similarity against ~25 bank, shopping and government brand domains, e.g. `paypa1.com`).
-- **LLM analyst:** an open model served through Featherless returns structured JSON.
+- **LLM analyst:** an open model served via Groq, NVIDIA NIM or Featherless (all free tiers) returns structured JSON.
 - **Score:** 40% rules + 60% LLM. Without an API key it falls back to rules only.
 
 ## Run
 ```bash
 pip install -r requirements.txt
-export FEATHERLESS_API_KEY=...   # optional
+export GROQ_API_KEY=...   # optional; or NVIDIA_API_KEY / FEATHERLESS_API_KEY
 streamlit run app.py
 ```
 

@@ -8,8 +8,11 @@ from urllib.parse import urlparse
 import requests
 import streamlit as st
 
-API_URL = "https://api.featherless.ai/v1/chat/completions"
-MODEL = os.getenv("FEATHERLESS_MODEL", "meta-llama/Meta-Llama-3.1-8B-Instruct")
+PROVIDERS = {  # env var -> (endpoint, default model); all OpenAI-compatible, all have free tiers
+    "GROQ_API_KEY": ("https://api.groq.com/openai/v1/chat/completions", "llama-3.1-8b-instant"),
+    "NVIDIA_API_KEY": ("https://integrate.api.nvidia.com/v1/chat/completions", "nvidia/llama-3.1-nemotron-nano-8b-v1"),
+    "FEATHERLESS_API_KEY": ("https://api.featherless.ai/v1/chat/completions", "meta-llama/Meta-Llama-3.1-8B-Instruct"),
+}
 BRANDS = ["paypal.com", "amazon.com", "google.com", "apple.com", "microsoft.com", "netflix.com",
           "facebook.com", "instagram.com", "whatsapp.com", "sbi.co.in", "hdfcbank.com", "icicibank.com",
           "axisbank.com", "paytm.com", "phonepe.com", "flipkart.com", "irctc.co.in", "incometax.gov.in",
@@ -46,12 +49,12 @@ def rule_check(text: str) -> tuple[int, list[str]]:
     return min(100, 20 * len(flags)), flags
 
 
-def llm_check(text: str, key: str) -> dict:
+def llm_check(text: str, key: str, url: str, model: str) -> dict:
     prompt = ("You are a fraud analyst. Classify the message below as a scam or not. Reply ONLY with JSON: "
               '{"score": 0-100 scam likelihood, "verdict": "Safe|Suspicious|Scam", '
               '"reasons": [short strings], "advice": "one sentence of what the user should do"}\n\nMessage:\n' + text)
-    r = requests.post(API_URL, timeout=60, headers={"Authorization": f"Bearer {key}"},
-                      json={"model": MODEL, "messages": [{"role": "user", "content": prompt}], "temperature": 0})
+    r = requests.post(url, timeout=60, headers={"Authorization": f"Bearer {key}"},
+                      json={"model": model, "messages": [{"role": "user", "content": prompt}], "temperature": 0})
     r.raise_for_status()
     content = r.json()["choices"][0]["message"]["content"]
     return json.loads(re.search(r"\{.*\}", content, re.S).group(0))
@@ -60,12 +63,20 @@ def llm_check(text: str, key: str) -> dict:
 st.set_page_config(page_title="ScamCheck", page_icon="🛡️")
 st.title("🛡️ ScamCheck")
 st.caption("Paste a suspicious SMS, email or DM. Rule-based checks plus an LLM give you a verdict.")
-key = os.getenv("FEATHERLESS_API_KEY", "")
+def find_provider() -> tuple[str, str, str]:
+    for env, (url, model) in PROVIDERS.items():
+        try:
+            key = os.getenv(env) or st.secrets.get(env, "")
+        except Exception:
+            key = os.getenv(env, "")
+        if key:
+            return key, url, model
+    return "", "", ""
+
+
+key, url, model = find_provider()
 if not key:
-    try:
-        key = st.secrets["FEATHERLESS_API_KEY"]
-    except Exception:
-        key = st.text_input("Featherless API key (optional)", type="password")
+    st.caption("No LLM key configured: running rule-based checks only.")
 pick = st.selectbox("Try an example", ["(none)", *EXAMPLES])
 text = st.text_area("Message", EXAMPLES.get(pick, ""), height=150)
 
@@ -75,7 +86,7 @@ if st.button("Check", type="primary") and text.strip():
     if key:
         try:
             with st.spinner("Asking the AI analyst..."):
-                ai = llm_check(text, key)
+                ai = llm_check(text, key, url, model)
         except Exception as e:
             st.warning(f"AI check unavailable ({type(e).__name__}); showing rule-based result only.")
     score = round(0.4 * rule_score + 0.6 * max(0, min(100, int(ai["score"])))) if "score" in ai else rule_score
