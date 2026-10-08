@@ -9,7 +9,7 @@ import requests
 import streamlit as st
 
 PROVIDERS = {  # env var -> (endpoint, default model); all OpenAI-compatible, all have free tiers
-    "GROQ_API_KEY": ("https://api.groq.com/openai/v1/chat/completions", "llama-3.1-8b-instant"),
+    "GROQ_API_KEY": ("https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-20b"),
     "NVIDIA_API_KEY": ("https://integrate.api.nvidia.com/v1/chat/completions", "nvidia/llama-3.1-nemotron-nano-8b-v1"),
     "FEATHERLESS_API_KEY": ("https://api.featherless.ai/v1/chat/completions", "meta-llama/Meta-Llama-3.1-8B-Instruct"),
 }
