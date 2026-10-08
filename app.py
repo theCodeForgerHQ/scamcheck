@@ -78,16 +78,16 @@ if st.button("Check", type="primary") and text.strip():
                 ai = llm_check(text, key)
         except Exception as e:
             st.warning(f"AI check unavailable ({type(e).__name__}); showing rule-based result only.")
-    score = round(0.4 * rule_score + 0.6 * int(ai["score"])) if "score" in ai else rule_score
+    score = round(0.4 * rule_score + 0.6 * max(0, min(100, int(ai["score"])))) if "score" in ai else rule_score
     verdict = "Scam" if score >= 60 else "Suspicious" if score >= 30 else "Safe"
     color = {"Scam": "red", "Suspicious": "orange", "Safe": "green"}[verdict]
     st.markdown(f"## :{color}[{verdict}] — risk {score}/100")
     st.progress(score / 100)
     st.subheader("Red flags")
     for f in flags + ai.get("reasons", []):
-        st.write("• " + f)
+        st.text("• " + str(f)[:200])
     if not flags and not ai.get("reasons"):
         st.write("None found.")
     st.subheader("What to do")
-    st.info(ai.get("advice") or ("Don't click links or share OTPs. Verify through the official app or website, "
+    st.info(str(ai.get("advice", ""))[:300] or ("Don't click links or share OTPs. Verify through the official app or website, "
                                  "and report fraud at cybercrime.gov.in / 1930." if score >= 30 else "Looks fine. Stay alert."))
