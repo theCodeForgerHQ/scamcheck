@@ -3,7 +3,7 @@
 **Title:** ScamCheck: an AI second opinion before you click
 **Tagline:** Paste any suspicious SMS, email or DM and get a risk score, red flags and what to do in seconds.
 **Track:** AI + Cybersecurity
-**Links:** https://scamcheck.streamlit.app · https://github.com/theCodeForgerHQ/scamcheck · <YouTube link>
+**Links:** https://scamcheck.streamlit.app · https://github.com/theCodeForgerHQ/scamcheck · https://youtu.be/sPCsKWcRjWY
 **Built with:** python, streamlit, groq, gpt-oss-20b, regex, difflib
 
 ## Inspiration
