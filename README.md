@@ -13,11 +13,11 @@ Anyone who receives a suspicious SMS, email or DM: students, parents and elderly
 ## How it works
 ```mermaid
 flowchart LR
-  A[Pasted message] --> B[Rule engine: urgency, OTP or payment asks, short links, raw IPs, lookalike domains]
-  A --> C[LLM (Groq / NVIDIA NIM / Featherless): JSON verdict, reasons, advice]
-  B --> D[Blended risk score 0-100]
+  A["Pasted message"] --> B["Rule engine: urgency, OTP/payment asks, short links, raw IPs, lookalike domains"]
+  A --> C["LLM via Groq / NVIDIA NIM / Featherless: JSON verdict, reasons, advice"]
+  B --> D["Blended risk score 0-100"]
   C --> D
-  D --> E[Verdict + red flags + what to do]
+  D --> E["Verdict + red flags + what to do"]
 ```
 - **Rule engine:** regex signals, plus lookalike-domain detection (`difflib` similarity against ~25 bank, shopping and government brand domains, e.g. `paypa1.com`).
 - **LLM analyst:** an open model served via Groq, NVIDIA NIM or Featherless (all free tiers) returns structured JSON.
